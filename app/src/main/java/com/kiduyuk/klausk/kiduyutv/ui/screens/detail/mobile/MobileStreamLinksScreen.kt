@@ -101,6 +101,15 @@ fun MobileStreamLinksScreen(
                     "VidFast" -> "${match.urlTemplate}&startAt=$timestamp"
                     else -> match.urlTemplate
                 }
+                val activity = run {
+                    var currentContext = context
+                    while (currentContext is android.content.ContextWrapper) {
+                        if (currentContext is android.app.Activity) return@run currentContext
+                        currentContext = currentContext.baseContext
+                    }
+                    null
+                }
+
                 val intent = Intent(context, PlayerActivity::class.java).apply {
                     putExtra("STREAM_URL", url)
                     putExtra("TITLE", title)
@@ -115,7 +124,12 @@ fun MobileStreamLinksScreen(
                     putExtra("RELEASE_DATE", releaseDate ?: "")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                context.startActivity(intent)
+                
+                if (activity != null) {
+                    activity.startActivity(intent)
+                } else {
+                    context.startActivity(intent)
+                }
             }
         }
     }

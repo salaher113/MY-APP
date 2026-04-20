@@ -100,12 +100,10 @@ class PlayerActivity : AppCompatActivity() {
     // The player sends progress updates via window.postMessage with these fields:
     // id, type (movie/tv/anime), progress, timestamp, duration, season, episode
     @Suppress("UNUSED")
-    /**
-     * JavaScript interface to receive messages from WebView.
-     * Non-inner class for stability across different Android WebView versions and R8 obfuscation.
-     */
+    @androidx.annotation.Keep
     class PlayerJavaScriptInterface(private val activity: PlayerActivity) {
         @JavascriptInterface
+        @androidx.annotation.Keep
         fun postMessage(message: String) {
             activity.runOnUiThread {
                 try {
@@ -138,7 +136,7 @@ class PlayerActivity : AppCompatActivity() {
      * Process player progress data received from the JavaScript message listener.
      * Extracts and stores the latest playback info for periodic saving to watch history.
      */
-    private fun processPlayerProgressData(data: org.json.JSONObject) {
+    internal fun processPlayerProgressData(data: org.json.JSONObject) {
         try {
             // Extract content info
             if (data.has("id")) {

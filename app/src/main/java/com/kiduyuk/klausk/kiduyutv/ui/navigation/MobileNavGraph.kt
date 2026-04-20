@@ -523,7 +523,17 @@ fun MobileNavGraph(navController: NavHostController) {
                 timestamp = timestamp,
                 onBackClick = { navController.popBackStack() },
                 onProviderClick = { providerUrl ->
-                    val intent = Intent(navController.context, PlayerActivity::class.java).apply {
+                    val context = navController.context
+                    val activity = run {
+                        var currentContext = context
+                        while (currentContext is android.content.ContextWrapper) {
+                            if (currentContext is android.app.Activity) return@run currentContext
+                            currentContext = currentContext.baseContext
+                        }
+                        null
+                    }
+
+                    val intent = Intent(context, PlayerActivity::class.java).apply {
                         putExtra("TMDB_ID", tmdbId)
                         putExtra("IS_TV", isTv)
                         putExtra("SEASON_NUMBER", season ?: 1)
@@ -537,7 +547,12 @@ fun MobileNavGraph(navController: NavHostController) {
                         putExtra("STREAM_URL", providerUrl)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
-                    navController.context.startActivity(intent)
+                    
+                    if (activity != null) {
+                        activity.startActivity(intent)
+                    } else {
+                        context.startActivity(intent)
+                    }
                 }
             )
         }
