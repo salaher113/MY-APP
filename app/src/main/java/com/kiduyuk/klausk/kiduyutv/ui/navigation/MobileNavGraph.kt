@@ -526,8 +526,8 @@ fun MobileNavGraph(navController: NavHostController) {
                     val intent = Intent(navController.context, PlayerActivity::class.java).apply {
                         putExtra("TMDB_ID", tmdbId)
                         putExtra("IS_TV", isTv)
-                        putExtra("SEASON_NUMBER", season ?: 0)
-                        putExtra("EPISODE_NUMBER", episode ?: 0)
+                        putExtra("SEASON_NUMBER", season ?: 1)
+                        putExtra("EPISODE_NUMBER", episode ?: 1)
                         putExtra("TITLE", title)
                         putExtra("OVERVIEW", overview)
                         putExtra("POSTER_PATH", posterPath ?: "")
@@ -535,6 +535,7 @@ fun MobileNavGraph(navController: NavHostController) {
                         putExtra("VOTE_AVERAGE", voteAverage)
                         putExtra("RELEASE_DATE", releaseDate ?: "")
                         putExtra("STREAM_URL", providerUrl)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     navController.context.startActivity(intent)
                 }

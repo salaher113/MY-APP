@@ -195,21 +195,20 @@ fun StreamLinksScreen(
                                 timestamp = timestamp
                             ) ?: provider.urlTemplate
 
-                            val intent = Intent(context, PlayerActivity::class.java).apply {
-                                putExtra("STREAM_URL", finalUrl)
-                                putExtra("TMDB_ID", tmdbId)
-                                putExtra("IS_TV", isTv)
-                                putExtra("TITLE", title)
-                                putExtra("OVERVIEW", overview)
-                                putExtra("POSTER_PATH", posterPath)
-                                putExtra("BACKDROP_PATH", backdropPath)
-                                putExtra("VOTE_AVERAGE", voteAverage)
-                                putExtra("RELEASE_DATE", releaseDate)
-                                if (isTv) {
-                                    putExtra("SEASON_NUMBER", season ?: 1)
-                                    putExtra("EPISODE_NUMBER", episode ?: 1)
-                                }
-                            }
+                             val intent = Intent(context, PlayerActivity::class.java).apply {
+                                 putExtra("STREAM_URL", finalUrl)
+                                 putExtra("TMDB_ID", tmdbId)
+                                 putExtra("IS_TV", isTv)
+                                 putExtra("TITLE", title)
+                                 putExtra("OVERVIEW", overview ?: "")
+                                 putExtra("POSTER_PATH", posterPath ?: "")
+                                 putExtra("BACKDROP_PATH", backdropPath ?: "")
+                                 putExtra("VOTE_AVERAGE", voteAverage)
+                                 putExtra("RELEASE_DATE", releaseDate ?: "")
+                                 putExtra("SEASON_NUMBER", season ?: 1)
+                                 putExtra("EPISODE_NUMBER", episode ?: 1)
+                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                             }
 
                             // Show TV interstitial before launching player (TV flavour only)
                             if (BuildConfig.FLAVOR == "tv") {

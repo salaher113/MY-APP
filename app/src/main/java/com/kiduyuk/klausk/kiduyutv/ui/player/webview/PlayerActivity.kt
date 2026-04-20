@@ -342,42 +342,51 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         // Detect device type and disable cursor for mobile
-        val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
-        if (uiModeManager.currentModeType != Configuration.UI_MODE_TYPE_TELEVISION) {
+        try {
+            val uiModeManager = getSystemService(UiModeManager::class.java)
+            if (uiModeManager?.currentModeType != Configuration.UI_MODE_TYPE_TELEVISION) {
+                isCursorDisabled = true
+                Log.i(TAG, "[Device] Mobile/Tablet detected, disabling cursor")
+            } else {
+                Log.i(TAG, "[Device] TV detected, cursor enabled")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to detect UI mode, defaulting to Mobile: ${e.message}")
             isCursorDisabled = true
-            Log.i(TAG, "[Device] Mobile/Tablet detected, disabling cursor")
-        } else {
-            Log.i(TAG, "[Device] TV detected, cursor enabled")
         }
 
-        val existsInHistory = repository.isInWatchHistory(this, tmdbId, isTv)
+        try {
+            val existsInHistory = repository.isInWatchHistory(this, tmdbId, isTv)
 
-        if (existsInHistory) {
-            Log.i(
-                TAG,
-                "[WatchHistory] Item exists, updating season $currentSeason episode $currentEpisode"
-            )
-            // FIX: Only update episode info for TV content, not movies
-            if (isTv) {
-                repository.updateEpisodeInfo(tmdbId, "tv", currentSeason, currentEpisode)
-            }
-        } else {
-            Log.i(TAG, "[WatchHistory] New item, saving to history")
-            repository.saveToWatchHistory(
-                this,
-                WatchHistoryItem(
-                    id = tmdbId,
-                    title = contentTitle,
-                    overview = contentOverview,
-                    posterPath = contentPosterPath,
-                    backdropPath = contentBackdropPath,
-                    voteAverage = contentVoteAverage,
-                    releaseDate = contentReleaseDate,
-                    isTv = isTv,
-                    seasonNumber = if (isTv) currentSeason else null,
-                    episodeNumber = if (isTv) currentEpisode else null
+            if (existsInHistory) {
+                Log.i(
+                    TAG,
+                    "[WatchHistory] Item exists, updating season $currentSeason episode $currentEpisode"
                 )
-            )
+                // FIX: Only update episode info for TV content, not movies
+                if (isTv) {
+                    repository.updateEpisodeInfo(tmdbId, "tv", currentSeason, currentEpisode)
+                }
+            } else {
+                Log.i(TAG, "[WatchHistory] New item, saving to history")
+                repository.saveToWatchHistory(
+                    this,
+                    WatchHistoryItem(
+                        id = tmdbId,
+                        title = contentTitle,
+                        overview = contentOverview,
+                        posterPath = contentPosterPath,
+                        backdropPath = contentBackdropPath,
+                        voteAverage = contentVoteAverage,
+                        releaseDate = contentReleaseDate,
+                        isTv = isTv,
+                        seasonNumber = if (isTv) currentSeason else null,
+                        episodeNumber = if (isTv) currentEpisode else null
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error handling watch history: ${e.message}")
         }
 
         val url = intent.getStringExtra("STREAM_URL") ?: if (isTv) {

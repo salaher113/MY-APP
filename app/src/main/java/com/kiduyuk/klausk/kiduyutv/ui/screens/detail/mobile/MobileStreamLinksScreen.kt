@@ -108,11 +108,12 @@ fun MobileStreamLinksScreen(
                     putExtra("IS_TV", isTv)
                     putExtra("SEASON_NUMBER", season ?: 1)
                     putExtra("EPISODE_NUMBER", episode ?: 1)
-                    putExtra("OVERVIEW", overview)
-                    putExtra("POSTER_PATH", posterPath)
-                    putExtra("BACKDROP_PATH", backdropPath)
+                    putExtra("OVERVIEW", overview ?: "")
+                    putExtra("POSTER_PATH", posterPath ?: "")
+                    putExtra("BACKDROP_PATH", backdropPath ?: "")
                     putExtra("VOTE_AVERAGE", voteAverage)
-                    putExtra("RELEASE_DATE", releaseDate)
+                    putExtra("RELEASE_DATE", releaseDate ?: "")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
             }
