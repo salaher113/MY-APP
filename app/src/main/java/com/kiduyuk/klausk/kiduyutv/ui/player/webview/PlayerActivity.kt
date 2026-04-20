@@ -72,6 +72,9 @@ class PlayerActivity : AppCompatActivity() {
     // Cache intent extras so we don't re-read them on every progress tick
     private var intentTmdbId: Int = -1
     private var intentIsTv: Boolean = false
+    
+    // Late-init Firebase reference for safety
+    private var databaseRef: com.google.firebase.database.DatabaseReference? = null
 
     companion object {
         private const val TAG = "VideasyPlayer"
