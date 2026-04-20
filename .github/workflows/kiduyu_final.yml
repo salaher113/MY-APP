@@ -213,7 +213,7 @@ jobs:
           from pathlib import Path
           import requests
 
-          GITHUB_REPO = os.environ.get("GITHUB_REPOSITORY", "salaher113/MY-APP")
+          GITHUB_REPO = os.environ.get("GITHUB_REPOSITORY")
           GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}/releases"
           GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
           INDEX_FILE = Path("index.html")
