@@ -53,6 +53,7 @@ object AdvancedAdBlocker {
     }
 
     fun shouldBlock(url: String): Boolean {
+        if (!isInitialized) return false
         if (domainTrie.matches(url)) return true
         if (isSuspicious(url)) return true
         return false

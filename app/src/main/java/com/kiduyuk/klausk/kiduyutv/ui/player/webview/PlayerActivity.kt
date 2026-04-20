@@ -471,6 +471,7 @@ class PlayerActivity : AppCompatActivity() {
                     val reqUrlLower = reqUrl.lowercase()
                     if (AdvancedAdBlocker.shouldBlock(reqUrl) ||
                         extraAdHosts.any { reqUrlLower.contains(it) }) {
+                        Log.i("PlayerActivity", "[Blocking] $reqUrl")
                         return WebResourceResponse(
                             "text/plain",
                             "utf-8",

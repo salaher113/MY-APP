@@ -97,8 +97,17 @@
 # ⚙️ MODEL CLASSES (IMPORTANT)
 ##############################################
 
-# Keep your app models (adjust package if needed)
--keep class com.kiduyuk.klausk.kiduyutv.model.** { *; }
+# Keep your app models (CRITICAL FIX: CORRECTED PACKAGE PATH)
+-keep class com.kiduyuk.klausk.kiduyutv.data.model.** { *; }
+
+# Glide (Image Loading)
+-keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public class * extends com.bumptech.glide.module.LibraryGlideModule
+-keep class com.bumptech.glide.** { *; }
+
+# Firebase (Database, Auth, Messaging)
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.internal.firebase** { *; }
 
 
 ##############################################

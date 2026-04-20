@@ -14,6 +14,7 @@ import com.google.gson.annotations.SerializedName
  * @param genreIds A list of genre IDs associated with the movie.
  * @param popularity The popularity score of the movie.
  */
+@androidx.annotation.Keep
 data class Movie(
     @SerializedName("id") val id: Int,
     @SerializedName("title") val title: String?,
@@ -38,6 +39,7 @@ data class Movie(
  * @param genreIds A list of genre IDs associated with the TV show.
  * @param popularity The popularity score of the TV show.
  */
+@androidx.annotation.Keep
 data class TvShow(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String?,
@@ -240,6 +242,7 @@ data class TvShowSeasonResponse(
  * @param seasonNumber The season number the episode belongs to.
  * @param voteAverage The average vote score for the episode.
  */
+@androidx.annotation.Keep
 data class Episode(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
@@ -269,6 +272,7 @@ data class SeasonDetail(
 /**
  * Data class representing an item in the watch history.
  */
+@androidx.annotation.Keep
 data class WatchHistoryItem(
     val id: Int,
     val title: String,

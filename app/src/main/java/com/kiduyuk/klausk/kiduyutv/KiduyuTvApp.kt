@@ -37,8 +37,11 @@ class KiduyuTvApp : MultiDexApplication(), ImageLoaderFactory {
         // Initialize MyListManager (now uses Room internally)
         MyListManager.init(this)
 
-        // Initialize Ad Blocker (previously in PlayerActivity)
-        AdvancedAdBlocker.init(this)
+        // Initialize Ad Blocker (in background to avoid UI blocking)
+        val context = this
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            AdvancedAdBlocker.init(context)
+        }
 
         // Initialize notification channels
         NotificationHelper.createNotificationChannel(this)
@@ -49,8 +52,12 @@ class KiduyuTvApp : MultiDexApplication(), ImageLoaderFactory {
         // Initialize Firebase Analytics
         FirebaseAnalytics.getInstance(this)
 
-        // Initialize Firebase Realtime Database with persistence
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        // Initialize Firebase Realtime Database with persistence (safely handled)
+        try {
+            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
+        } catch (e: Exception) {
+            // Persistence may already be enabled or instance used; ignore to prevent crash
+        }
 
         // Initialize FirebaseManager with device-based user ID
         // This enables syncing My List, Saved Companies, Networks, etc.
