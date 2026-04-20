@@ -21,6 +21,7 @@ object AdManager {
 
     private const val TAG = "AdManager"
     private const val MIN_INTERSTITIAL_INTERVAL_MS = 3 * 60 * 1000L  // 3 minutes
+    private const val DISABLE_ADS = true // Global control for advertisements
 
     @Volatile private var isInitialised = false
     @Volatile private var interstitialAd: InterstitialAd? = null
@@ -34,6 +35,11 @@ object AdManager {
      * Safe to call multiple times — subsequent calls are no-ops.
      */
     fun init(context: Context) {
+        if (DISABLE_ADS) {
+            isInitialised = true
+            Log.i(TAG, "MobileAds disabled as per DISABLE_ADS flag")
+            return
+        }
         if (isInitialised) return
         MobileAds.initialize(context) { initStatus ->
             isInitialised = true
@@ -80,6 +86,10 @@ object AdManager {
      * (or immediately if no ad is ready).
      */
     fun showInterstitial(activity: Activity, onDismissed: () -> Unit = {}) {
+        if (DISABLE_ADS) {
+            onDismissed()
+            return
+        }
         val now = System.currentTimeMillis()
         if (now - lastInterstitialShownAt < MIN_INTERSTITIAL_INTERVAL_MS) {
             Log.i(TAG, "Interstitial skipped - too soon since last show")
@@ -135,6 +145,11 @@ object AdManager {
         onRewarded: () -> Unit = {},
         onDismissed: () -> Unit = {}
     ) {
+        if (DISABLE_ADS) {
+            onRewarded() // Grant reward immediately if ads are disabled
+            onDismissed()
+            return
+        }
         val ad = rewardedAd
         if (ad == null) {
             Log.i(TAG, "No rewarded ad ready")

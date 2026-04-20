@@ -47,25 +47,7 @@ object TvInterstitialManager {
      * Used before PlayerActivity launches on TV.
      */
     fun showAndThenLaunch(activity: Activity, onDismissed: () -> Unit) {
-        val ad = interstitialAd
-        if (ad == null) {
-            Log.i(TAG, "No TV interstitial ready — proceeding to launch")
-            onDismissed()
-            preload(activity)
-            return
-        }
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                interstitialAd = null
-                preload(activity)
-                onDismissed()
-            }
-            override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                interstitialAd = null
-                onDismissed()
-            }
-        }
-        ad.show(activity)
+        onDismissed()
     }
 
     /**
@@ -73,25 +55,7 @@ object TvInterstitialManager {
      * Used for back navigation on TV detail screens.
      */
     fun showAndThen(activity: Activity, onDismissed: () -> Unit) {
-        val ad = interstitialAd
-        if (ad == null) {
-            Log.i(TAG, "No TV interstitial ready — proceeding back")
-            onDismissed()
-            preload(activity)
-            return
-        }
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdDismissedFullScreenContent() {
-                interstitialAd = null
-                preload(activity)
-                onDismissed()
-            }
-            override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                interstitialAd = null
-                onDismissed()
-            }
-        }
-        ad.show(activity)
+        onDismissed()
     }
 
     val isReady: Boolean get() = interstitialAd != null
