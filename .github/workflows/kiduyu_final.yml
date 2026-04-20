@@ -85,8 +85,8 @@ jobs:
 #          echo "${VERSION}" > VERSION
 #          echo "Version set to ${VERSION}"
 
-      - name: Restore keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > kiduyutv_final
+#      - name: Restore keystore
+#        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > kiduyutv_final
 
       # ── Phone Release ─────────────────────────────────────────
       # ── Phone Release ─────────────────────────────────────────
