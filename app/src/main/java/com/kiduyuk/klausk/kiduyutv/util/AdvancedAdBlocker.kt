@@ -70,7 +70,7 @@ object AdvancedAdBlocker {
     fun getCss(): String {
         if (cssSelectors.isEmpty()) return ""
 
-        val css = cssSelectors.joinToString(", ")
+        val css = cssSelectors.joinToString(", ") { it.replace("'", "\\'") }
         return """
             (function() {
                 var style = document.createElement('style');

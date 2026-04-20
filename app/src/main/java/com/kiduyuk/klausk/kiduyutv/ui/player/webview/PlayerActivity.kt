@@ -97,45 +97,36 @@ class PlayerActivity : AppCompatActivity() {
     // The player sends progress updates via window.postMessage with these fields:
     // id, type (movie/tv/anime), progress, timestamp, duration, season, episode
     @Suppress("UNUSED")
-    inner class VideasyJavaScriptInterface {
+    /**
+     * JavaScript interface to receive messages from WebView.
+     * Non-inner class for stability across different Android WebView versions and R8 obfuscation.
+     */
+    class PlayerJavaScriptInterface(private val activity: PlayerActivity) {
         @JavascriptInterface
         fun postMessage(message: String) {
-            try {
-                //Log.i(TAG, "[JS Message] Received: $message")
-
-                val json = org.json.JSONObject(message)
-
-                // Handle different message formats
-                when {
-                    // Format 1: { type: "PLAYER_EVENT", data: { ... } }
-                    json.has("type") && json.getString("type") == "PLAYER_EVENT" && json.has("data") -> {
-                        val data = json.getJSONObject("data")
-                        processPlayerProgressData(data)
-                    }
-
-                    // Format 2: Direct progress object { id, type, progress, timestamp, duration, season, episode }
-                    json.has("progress") && json.has("timestamp") -> {
-                        processPlayerProgressData(json)
-                    }
-
-                    // Format 3: Simple format { id, type, currentTime, duration }
-                    json.has("currentTime") -> {
-                        processPlayerProgressData(json)
-                    }
-
-                    else -> {
-                        Log.i(
-                            TAG,
-                            "[JS Message] Unrecognized message format, attempting generic parse"
-                        )
-                        // Try to extract any progress-like data
-                        if (json.has("progress") || json.has("timestamp") || json.has("currentTime")) {
-                            processPlayerProgressData(json)
+            activity.runOnUiThread {
+                try {
+                    val json = org.json.JSONObject(message)
+                    when {
+                        json.has("type") && json.getString("type") == "PLAYER_EVENT" && json.has("data") -> {
+                            val data = json.getJSONObject("data")
+                            activity.processPlayerProgressData(data)
+                        }
+                        json.has("progress") && json.has("timestamp") -> {
+                            activity.processPlayerProgressData(json)
+                        }
+                        json.has("currentTime") -> {
+                            activity.processPlayerProgressData(json)
+                        }
+                        else -> {
+                            if (json.has("progress") || json.has("timestamp") || json.has("currentTime")) {
+                                activity.processPlayerProgressData(json)
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    Log.e("VideasyPlayer", "[JS Message] Error parsing message: ${e.message}")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "[JS Message] Error parsing message: ${e.message}")
             }
         }
     }
@@ -457,7 +448,7 @@ class PlayerActivity : AppCompatActivity() {
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
             if (isTrackingEnabled) {
-                addJavascriptInterface(VideasyJavaScriptInterface(), "VideasyInterface")
+                addJavascriptInterface(PlayerJavaScriptInterface(this@PlayerActivity), "VideasyInterface")
             }
 
             webViewClient = object : WebViewClient() {
@@ -832,6 +823,18 @@ class PlayerActivity : AppCompatActivity() {
                 }
             }
         })
+
+        // START PLAYER
+        try {
+            // Lazy init Firebase Database reference
+            databaseRef = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("users_watch_history")
+            
+            webView.loadUrl(url)
+            Log.i(TAG, "[Player] Launching URL: $url")
+        } catch (e: Exception) {
+            Log.e(TAG, "Critical error during player launch: ${e.message}")
+            finish()
+        }
     }
 
     private fun onHideCustomViewInternal() {
@@ -862,8 +865,8 @@ class PlayerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         webView.onResume()
-        webView.resumeTimers()
-        progressHandler.postDelayed(progressRunnable, 15_000L)
+        // Setup periodic progress saving
+        progressHandler.postDelayed(progressRunnable, 15000)
     }
 
     override fun onPause() {
