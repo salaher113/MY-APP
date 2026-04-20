@@ -1,0 +1,122 @@
+{
+  "project_info": {
+    "project_number": "109926033937",
+    "firebase_url": "https://kiduyutvfinal-default-rtdb.firebaseio.com",
+    "project_id": "kiduyutvfinal",
+    "storage_bucket": "kiduyutvfinal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109926033937:android:113ea4200ce3fc69f2dfb0",
+        "android_client_info": {
+          "package_name": "com.kiduyuk.klausk.kiduyutv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "109926033937-v8vseike2cbv1ec2ul742e38o6h32tab.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kiduyuk.klausk.kiduyutv",
+            "certificate_hash": "054a2d5fad15b11d6714c4633b6d561e9496ee02"
+          }
+        },
+        {
+          "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNXqfgr68VzLaBsQ4hpULUdspS6uB4Sxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109926033937:android:fd1ae5d4cf7e1bfbf2dfb0",
+        "android_client_info": {
+          "package_name": "com.kiduyuk.klausk.kiduyutv.phone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "109926033937-dnp6d1a1ef9ad2uvijaaqlg1t5blrc84.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kiduyuk.klausk.kiduyutv.phone",
+            "certificate_hash": "054a2d5fad15b11d6714c4633b6d561e9496ee02"
+          }
+        },
+        {
+          "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNXqfgr68VzLaBsQ4hpULUdspS6uB4Sxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:109926033937:android:5c20ccacb27b9501f2dfb0",
+        "android_client_info": {
+          "package_name": "com.kiduyuk.klausk.kiduyutv.tv"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "109926033937-st1tuuihl0pp90h98nkdsfnq88p19ah9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kiduyuk.klausk.kiduyutv.tv",
+            "certificate_hash": "054a2d5fad15b11d6714c4633b6d561e9496ee02"
+          }
+        },
+        {
+          "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNXqfgr68VzLaBsQ4hpULUdspS6uB4Sxw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "109926033937-dsl207opc1lsa3fnonim2sfmnc0o9hjk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

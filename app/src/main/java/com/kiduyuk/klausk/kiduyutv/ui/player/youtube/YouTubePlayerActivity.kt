@@ -1,0 +1,153 @@
+package com.kiduyuk.klausk.kiduyutv.ui.player.youtube
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.view.View
+import android.widget.FrameLayout
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AppCompatActivity
+import com.kiduyuk.klausk.kiduyutv.R
+import com.kiduyuk.klausk.kiduyutv.util.QuitDialog
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.FullscreenListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+
+/**
+ * YouTube Player Activity for playing trailers on mobile devices.
+ * Uses the official android-youtube-player library for optimal mobile playback.
+ * Based on the official sample app implementation.
+ */
+class YouTubePlayerActivity : AppCompatActivity() {
+
+    private lateinit var youTubePlayer: YouTubePlayer
+    private lateinit var youTubePlayerView: YouTubePlayerView
+    private lateinit var fullscreenViewContainer: FrameLayout
+    private var videoId: String = ""
+    private var isFullscreen = false
+
+    companion object {
+        private const val TAG = "YouTubePlayer"
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_youtube_player)
+
+        videoId = intent.getStringExtra("VIDEO_ID") ?: run {
+            finish()
+            return
+        }
+        val title = intent.getStringExtra("TITLE") ?: "Trailer"
+
+        youTubePlayerView = findViewById(R.id.youtube_player_view)
+        fullscreenViewContainer = findViewById(R.id.full_screen_view_container)
+
+        val iFramePlayerOptions = IFramePlayerOptions.Builder(applicationContext)
+            .controls(1)
+            .fullscreen(1)
+            .langPref("en")      // prefer English captions
+            .ccLoadPolicy(1)     // show captions by default
+            .build()
+
+        // we need to initialize manually in order to pass IFramePlayerOptions to the player
+        youTubePlayerView.enableAutomaticInitialization = false
+
+        youTubePlayerView.addFullscreenListener(object : FullscreenListener {
+            override fun onEnterFullscreen(fullscreenView: View, exitFullscreen: () -> Unit) {
+                isFullscreen = true
+
+                // the video will continue playing in fullscreenView
+                youTubePlayerView.visibility = View.GONE
+                fullscreenViewContainer.visibility = View.VISIBLE
+                fullscreenViewContainer.addView(fullscreenView)
+            }
+
+            override fun onExitFullscreen() {
+                isFullscreen = false
+
+                // the video will continue playing in the player
+                youTubePlayerView.visibility = View.VISIBLE
+                fullscreenViewContainer.visibility = View.GONE
+                fullscreenViewContainer.removeAllViews()
+            }
+        })
+
+        youTubePlayerView.initialize(object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                this@YouTubePlayerActivity.youTubePlayer = youTubePlayer
+                //youTubePlayer.setPlaybackQuality(PlayerConstants.PlaybackQuality.HIGH)
+                youTubePlayer.loadVideo(videoId, 0f)
+                youTubePlayer.play()
+            }
+
+            override fun onStateChange(
+                youTubePlayer: YouTubePlayer,
+                state: PlayerConstants.PlayerState
+            ) {
+                //super.onStateChange(youTubePlayer, state)
+                if (state == PlayerConstants.PlayerState.ENDED) {
+                    finish()
+                }
+            }
+
+            override fun onError(
+                youTubePlayer: YouTubePlayer,
+                error: PlayerConstants.PlayerError
+            ) {
+                openInYouTubeApp()
+            }
+        }, iFramePlayerOptions)
+
+        lifecycle.addObserver(youTubePlayerView)
+
+        // Handle back press
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                showExitConfirmationDialog()
+
+            }
+        })
+    }
+
+    private fun showExitConfirmationDialog() {
+        QuitDialog(
+            context = this,
+            title = "Stop Trailer?",
+            message = "Are you sure you want to stop the trailer?",
+            positiveButtonText = "Stop",
+            negativeButtonText = "Continue",
+            lottieAnimRes = R.raw.exit,
+            onNo = { /* dismiss */ },
+            onYes = { finish() }
+        ).show()
+    }
+
+    private fun openInYouTubeApp() {
+        try {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.youtube.com/watch?v=$videoId")
+            )
+            startActivity(intent)
+            finish() // close your player activity
+        } catch (e: Exception) {
+            // Optional fallback if no app/browser
+            QuitDialog(
+                context = this,
+                title = "Error",
+                message = "Unable to open YouTube.",
+                positiveButtonText = "Close",
+                negativeButtonText = "",
+                lottieAnimRes = R.raw.exit,
+                onNo = {},
+                onYes = { finish() }
+            ).show()
+        }
+    }
+}
+

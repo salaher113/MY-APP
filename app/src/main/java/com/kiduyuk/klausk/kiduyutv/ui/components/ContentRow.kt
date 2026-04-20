@@ -1,0 +1,309 @@
+package com.kiduyuk.klausk.kiduyutv.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.kiduyuk.klausk.kiduyutv.data.api.TmdbApiService
+import com.kiduyuk.klausk.kiduyutv.ui.theme.FocusBorder
+import com.kiduyuk.klausk.kiduyutv.ui.theme.TextPrimary
+import com.kiduyuk.klausk.kiduyutv.ui.theme.TextSecondary
+
+/**
+ * A generic composable to display a horizontal row of content items.
+ * It handles focus changes and click events for each item, and can optionally trigger a callback
+ * when an item gains focus, typically to update a hero section.
+ *
+ * @param T The type of items in the row.
+ * @param title The title of the content row.
+ * @param items The list of items to display in the row.
+ * @param modifier The modifier to be applied to the content row.
+ * @param onItemFocus Optional lambda to be invoked when an item in the row gains focus.
+ * @param onItemClick Lambda to be invoked when an item in the row is clicked.
+ * @param content A composable lambda that defines how each item in the row is rendered.
+ *                It receives the item, a boolean indicating if it's focused, and an onClick lambda.
+ */
+@Composable
+fun <T> ContentRow(
+    title: String,
+    items: List<T>,
+    modifier: Modifier = Modifier,
+    initialFocusRequester: FocusRequester? = null,
+    restoreFocusItemId: Int? = null,
+    getItemId: (T) -> Int = { 0 },
+    onItemFocus: ((T) -> Unit)? = null,
+    onItemClick: (T) -> Unit,
+    content: @Composable (T, Boolean, () -> Unit) -> Unit
+) {
+    // State to keep track of the currently selected item's index. Initialized to -1 (no selection).
+    var selectedIndex by remember { mutableIntStateOf(-1) }
+    // State for the LazyRow to control scrolling.
+    val listState = rememberLazyListState()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+
+    ) {
+        // Display the title of the content row.
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = TextPrimary,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+
+        Spacer(modifier = Modifier.height(5.dp)) // Vertical spacing.
+
+        // Horizontal scrollable list of items.
+        LazyRow(
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            itemsIndexed(items) { index, item ->
+                // Create a MutableInteractionSource to observe focus state.
+                val interactionSource = remember { MutableInteractionSource() }
+                // Collect the focus state as a State.
+                val isFocused by interactionSource.collectIsFocusedAsState()
+
+                val itemFocusRequester = remember { FocusRequester() }
+                val itemId = getItemId(item)
+
+                LaunchedEffect(restoreFocusItemId) {
+                    if (restoreFocusItemId != null && itemId == restoreFocusItemId) {
+                        itemFocusRequester.requestFocus()
+                    }
+                }
+
+                // Effect to trigger onItemFocus when the item gains focus.
+                LaunchedEffect(isFocused) {
+                    if (isFocused) {
+                        selectedIndex = index
+                        onItemFocus?.invoke(item)
+                    }
+                }
+
+                // Box to wrap each content item, handling focus and clicks.
+                // We rely on the clickable modifier to handle both focus and click events
+                // to avoid the "double-click" issue where the first click only focuses the element.
+                Box(
+                    modifier = Modifier
+                        // Apply focus requester if it's the first item and a requester is provided.
+                        .then(if (index == 0 && initialFocusRequester != null) Modifier.focusRequester(initialFocusRequester) else Modifier)
+                        .focusRequester(itemFocusRequester)
+                        // Detect focus changes and update selectedIndex and call onItemFocus.
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                selectedIndex = index
+                                onItemFocus?.invoke(item)
+                            }
+                        }
+                        // Handle click events. This modifier automatically makes the Box focusable.
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null
+                        ) {
+                            selectedIndex = index
+                            onItemClick(item)
+                        },
+                    propagateMinConstraints = true
+                ) {
+                    // Render the actual content of the item using the provided lambda.
+                    content(item, isFocused) {
+                        // The card itself no longer handles the click, but we pass the logic
+                        // just in case, though it's now primarily handled by the wrapper Box.
+                        selectedIndex = index
+                        onItemClick(item)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/**
+ * Composable function to display a horizontal row of network items.
+ * It handles focus changes and click events for each network item.
+ *
+ * @param title The title of the network row.
+ * @param items The list of [NetworkItem] data to display.
+ * @param modifier The modifier to be applied to the network row.
+ * @param restoreFocusItemId Optional ID of the item to restore focus to after navigation.
+ * @param onItemClick Lambda to be invoked when a network item is clicked.
+ */
+@Composable
+fun NetworkRow(
+    title: String,
+    items: List<com.kiduyuk.klausk.kiduyutv.viewmodel.NetworkItem>,
+    modifier: Modifier = Modifier,
+    restoreFocusItemId: Int? = null,
+    onItemClick: (com.kiduyuk.klausk.kiduyutv.viewmodel.NetworkItem) -> Unit
+) {
+    // State to keep track of the currently selected item's index. Initialized to -1 (no selection).
+    var selectedIndex by remember { mutableIntStateOf(-1) }
+    // State for the LazyRow to control scrolling.
+    val listState = rememberLazyListState()
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+    ) {
+        // Display the title of the network row.
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = TextPrimary,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+
+        Spacer(modifier = Modifier.height(5.dp)) // Vertical spacing.
+
+        // Horizontal scrollable list of network items.
+        LazyRow(
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            itemsIndexed(items) { index, item ->
+                // Render each network item using NetworkCard.
+                NetworkCard(
+                    item = item,
+                    isSelected = index == selectedIndex,
+                    restoreFocus = restoreFocusItemId != null && item.id == restoreFocusItemId,
+                    onFocus = { selectedIndex = index }, // Update selectedIndex when item gains focus.
+                    onClick = {
+                        selectedIndex = index
+                        onItemClick(item)
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+/**
+ * Composable function to display a single network card.
+ * It handles its own focus and click events, and provides visual feedback for focus.
+ * Displays the network/company logo when available, otherwise shows the name as text.
+ *
+ * @param item The [NetworkItem] data to display.
+ * @param isSelected A boolean indicating if the card is currently selected (focused).
+ * @param restoreFocus A boolean indicating if focus should be restored to this card.
+ * @param onFocus Lambda to be invoked when the card gains focus.
+ * @param onClick Lambda to be invoked when the card is clicked.
+ */
+@Composable
+private fun NetworkCard(
+    item: com.kiduyuk.klausk.kiduyutv.viewmodel.NetworkItem,
+    isSelected: Boolean,
+    restoreFocus: Boolean = false,
+    onFocus: () -> Unit,
+    onClick: () -> Unit
+) {
+    // Create a MutableInteractionSource to observe focus state.
+    val interactionSource = remember { MutableInteractionSource() }
+    // Collect the focus state as a State.
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    // Create a FocusRequester for restoring focus after navigation.
+    val focusRequester = remember { FocusRequester() }
+
+    // Effect to restore focus when returning from navigation.
+    LaunchedEffect(restoreFocus) {
+        if (restoreFocus) {
+            focusRequester.requestFocus()
+        }
+    }
+
+    // Effect to trigger onFocus callback when the item gains focus.
+    LaunchedEffect(isFocused) {
+        if (isFocused) {
+            onFocus()
+        }
+    }
+
+    // Build the full logo URL if logoPath is available
+    val logoUrl = item.logoPath?.let { path ->
+        "${TmdbApiService.IMAGE_BASE_URL}${TmdbApiService.LOGO_SIZE}$path"
+    }
+
+    // Box to hold the network card content, applying size, background, and conditional border for focus indication.
+    Box(
+        modifier = Modifier
+            .width(160.dp)
+            .height(100.dp)
+            .focusRequester(focusRequester)
+            .then(
+                // Apply a border if the card is focused.
+                if (isFocused) {
+                    Modifier.border(
+                        width = 3.dp,
+                        color = FocusBorder,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
+            .clip(RoundedCornerShape(8.dp)) // Clip content to rounded corners.
+            .background(
+                color = Color(0xFF333333),
+                shape = RoundedCornerShape(8.dp)
+            )
+            // Detect focus changes and call onFocus.
+            .onFocusChanged { if (it.isFocused) onFocus() }
+            // Handle click events. This modifier automatically makes the Box focusable.
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        // Display the logo if available, otherwise show the network/company name.
+        if (logoUrl != null) {
+            AsyncImage(
+                model = logoUrl,
+                contentDescription = "${item.name} logo",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                contentScale = ContentScale.Fit
+            )
+        } else {
+            // Fallback: Display the network/company name as text.
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.titleMedium,
+                color = TextPrimary
+            )
+        }
+    }
+}
