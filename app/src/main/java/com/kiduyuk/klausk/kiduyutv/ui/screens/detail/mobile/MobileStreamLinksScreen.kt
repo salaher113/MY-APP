@@ -102,13 +102,17 @@ fun MobileStreamLinksScreen(
                     else -> match.urlTemplate
                 }
                 val intent = Intent(context, PlayerActivity::class.java).apply {
-                    putExtra("url", url)
-                    putExtra("title", title)
-                    putExtra("tmdbId", tmdbId)
-                    putExtra("isTv", isTv)
-                    putExtra("season", season ?: 0)
-                    putExtra("episode", episode ?: 0)
-                    putExtra("timestamp", timestamp)
+                    putExtra("STREAM_URL", url)
+                    putExtra("TITLE", title)
+                    putExtra("TMDB_ID", tmdbId)
+                    putExtra("IS_TV", isTv)
+                    putExtra("SEASON_NUMBER", season ?: 1)
+                    putExtra("EPISODE_NUMBER", episode ?: 1)
+                    putExtra("OVERVIEW", overview)
+                    putExtra("POSTER_PATH", posterPath)
+                    putExtra("BACKDROP_PATH", backdropPath)
+                    putExtra("VOTE_AVERAGE", voteAverage)
+                    putExtra("RELEASE_DATE", releaseDate)
                 }
                 context.startActivity(intent)
             }
@@ -232,34 +236,18 @@ fun MobileStreamLinksScreen(
                         MobileStreamProviderCard(
                             provider = provider,
                             onProviderClick = {
-                                // Launch PlayerActivity for webview links
-                                val intent = Intent(context, PlayerActivity::class.java).apply {
-                                    putExtra("TMDB_ID", tmdbId)
-                                    putExtra("IS_TV", isTv)
-                                    putExtra("SEASON_NUMBER", season ?: 0)
-                                    putExtra("EPISODE_NUMBER", episode ?: 0)
-                                    putExtra("TITLE", title)
-                                    putExtra("OVERVIEW", overview)
-                                    putExtra("POSTER_PATH", posterPath)
-                                    putExtra("BACKDROP_PATH", backdropPath)
-                                    putExtra("VOTE_AVERAGE", voteAverage)
-                                    putExtra("RELEASE_DATE", releaseDate)
-
-                                    val finalUrl = if (timestamp > 0) {
-                                        when (provider.name) {
-                                            "VidLink" -> "${provider.urlTemplate}&startAt=$timestamp"
-                                            "VidKing" -> "${provider.urlTemplate}&progress=$timestamp"
-                                            "Videasy" -> "${provider.urlTemplate}&progress=$timestamp"
-                                            "VidFast" -> "${provider.urlTemplate}&startAt=$timestamp"
-                                            else -> provider.urlTemplate
-                                        }
-                                    } else {
-                                        provider.urlTemplate
+                                val resolvedUrl = if (timestamp > 0) {
+                                    when (provider.name) {
+                                        "VidLink" -> "${provider.urlTemplate}&startAt=$timestamp"
+                                        "VidKing" -> "${provider.urlTemplate}&progress=$timestamp"
+                                        "Videasy" -> "${provider.urlTemplate}&progress=$timestamp"
+                                        "VidFast" -> "${provider.urlTemplate}&startAt=$timestamp"
+                                        else -> provider.urlTemplate
                                     }
-                                    putExtra("STREAM_URL", finalUrl)
+                                } else {
+                                    provider.urlTemplate
                                 }
-                                context.startActivity(intent)
-                                onProviderClick(provider.urlTemplate)
+                                onProviderClick(resolvedUrl)
                             }
                         )
                         Spacer(modifier = Modifier.height(12.dp))
